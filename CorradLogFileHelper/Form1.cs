@@ -16,5 +16,10 @@ namespace CorradLogFileHelper
         {
             InitializeComponent();
         }
+
+        private void btnGet_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
