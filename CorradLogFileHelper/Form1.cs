@@ -65,42 +65,84 @@ namespace CorradLogFileHelper
         private void ReadLogFile(string LogFile)
         {
             ArrayList LogLine = new ArrayList();
-            using (System.IO.StreamReader sr = new System.IO.StreamReader(LogFile))
+            try
             {
-                String line;
-                while ((line = sr.ReadLine()) != null)
+                using (System.IO.StreamReader sr = new System.IO.StreamReader(LogFile))
                 {
+                    String line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
 
-                    LogLine.Add(line);
+                        LogLine.Add(line);
+
+                    }
+                }
+                DataTable dtLog = new DataTable();
+                dtLog.Columns.Add("APPName");
+                dtLog.Columns.Add("IP");
+                dtLog.Columns.Add("DateCalled");
+                dtLog.Columns.Add("TimeCalled");
+                dtLog.Columns.Add("APIName");
+                foreach (string item in LogLine)
+                {
+                    try
+                    {
+                        //0: Requestor IP
+                        //2: Date Called
+                        //3: Time Called
+                        //14: API Name &Parameter
+                        string[] strLine = item.Split(',');
+                        if (strLine.Length > 4)
+                        {
+                            DataRow dr = dtLog.NewRow();
+                            dr[0] = getAppName(strLine[0].ToString());
+                            dr[1] = strLine[0].ToString();
+                            dr[2] = strLine[2].ToString();
+                            dr[3] = strLine[3].ToString();
+                            string[] strAPI = new string[strLine[14].Length];
+                            strAPI = strLine[14].ToString().Split('&');
+                            string APIName = strAPI[0].ToString().Replace("api_name=", "");
+                            dr[4] = APIName;
+                            dtLog.Rows.Add(dr);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
 
                 }
+                BindToGridView(dtLog);
             }
-            DataTable dtLog = new DataTable();
-            dtLog.Columns.Add("IP");
-            dtLog.Columns.Add("DateCalled");
-            dtLog.Columns.Add("TimeCalled");
-            dtLog.Columns.Add("APIParam");
-            foreach (string item in LogLine)
+            catch (Exception ex)
             {
-                //0: Requestor IP
-                //2: Date Called
-                //3: Time Called
-                //14: API Name &Parameter
-                string[] strLine = item.Split(',');
-                DataRow dr = dtLog.NewRow();
 
-                dr[0] = strLine[0].ToString();
-                dr[1] = strLine[2].ToString();
-                dr[2] = strLine[3].ToString();
-                dr[3] = strLine[14].ToString();
-                dtLog.Rows.Add(dr);
-
+                throw;
             }
-            BindToGridView(dtLog);
+            
+        }
+
+        private string getAppName(string IPAdd)
+        {
+            string output = "";
+            try
+            {
+                output = AppServerDetails.getAppName(IPAdd);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+           
+          
+            return output;
         }
 
         private void BindToGridView(DataTable dtLog)
         {
+       
             dgLogFile.DataSource = dtLog;
         }
 
